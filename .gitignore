@@ -1,0 +1,4 @@
+*.pth
+*.log
+*.ipynb
+*/*.ipynb
