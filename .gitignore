@@ -8,6 +8,7 @@ ignore this files when commit.
 */*.pyc
 test
 test/*
+*.local
 
 # data files.
 *.h5
