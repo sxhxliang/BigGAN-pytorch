@@ -25,9 +25,9 @@ class Data_Loader():
         transform = transforms.Compose(options)
         return transform
 
-    def load_lsun(self, classes='church_outdoor_train'):
+    def load_lsun(self, classes=['church_outdoor_train','classroom_train']):
         transforms = self.transform(True, True, True, False)
-        dataset = dsets.LSUN(self.path, classes=[classes], transform=transforms)
+        dataset = dsets.LSUN(self.path, classes=classes, transform=transforms)
         return dataset
     
     def load_imagenet(self):

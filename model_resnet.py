@@ -92,6 +92,11 @@ class SelfAttention(nn.Module):
         self.gamma = nn.Parameter(torch.zeros(1))
 
         self.softmax  = nn.Softmax(dim=-1) #
+
+        init_conv(self.query_conv)
+        init_conv(self.key_conv)
+        init_conv(self.value_conv)
+        
     def forward(self,x):
         """
             inputs :
@@ -235,7 +240,6 @@ class Generator(nn.Module):
         class_emb = self.linear(class_id)  # 128
 
         out = self.G_linear(codes[0])
-        # print(out)
         # out = out.view(-1, 1536, 4, 4)
         out = out.view(-1, self.first_view, 4, 4)
         ids = 1
@@ -268,9 +272,11 @@ class Discriminator(nn.Module):
                           upsample=False, downsample=downsample)
 
         gain = 2 ** 0.5
+        
 
         if debug:
             chn = 8
+        self.debug = debug
 
         self.pre_conv = nn.Sequential(SpectralNorm(nn.Conv2d(3, 1*chn, 3,padding=1),),
                                       nn.ReLU(),
@@ -293,6 +299,7 @@ class Discriminator(nn.Module):
         self.embed = spectral_norm(self.embed)
 
     def forward(self, input, class_id):
+        
         out = self.pre_conv(input)
         out = out + self.pre_skip(F.avg_pool2d(input, 2))
         # print(out.size())
@@ -303,9 +310,12 @@ class Discriminator(nn.Module):
         out_linear = self.linear(out).squeeze(1)
         embed = self.embed(class_id)
 
-        # print(out_linear.size())
-        # print(embed.size())
-
         prod = (out * embed).sum(1)
+
+        # if self.debug == debug:
+        #     print('class_id',class_id.size())
+        #     print('out_linear',out_linear.size())
+        #     print('embed', embed.size())
+        #     print('prod', prod.size())
 
         return out_linear + prod

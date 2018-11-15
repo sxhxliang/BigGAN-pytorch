@@ -28,6 +28,7 @@ class Trainer(object):
         self.g_conv_dim = config.g_conv_dim
         self.d_conv_dim = config.d_conv_dim
         self.parallel = config.parallel
+        self.gpus = config.gpus
 
         self.lambda_gp = config.lambda_gp
         self.total_step = config.total_step
@@ -53,6 +54,7 @@ class Trainer(object):
         self.version = config.version
 
         self.n_class = config.n_class
+        self.chn = config.chn
 
         # Path
         self.log_path = os.path.join(config.log_path, self.version)
@@ -61,6 +63,7 @@ class Trainer(object):
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+        print('build_model...')
         self.build_model()
 
         if self.use_tensorboard:
@@ -68,15 +71,14 @@ class Trainer(object):
 
         # Start with trained model
         if self.pretrained_model:
+            print('load_pretrained_model...')
             self.load_pretrained_model()
 
 
     def label_sampel(self):
         label = torch.LongTensor(self.batch_size, 1).random_()%self.n_class
-        one_hot= torch.zeros(self.batch_size, self.n_class).scatter_(1, label, 1).to(self.device)       
-        
-        return label.to(self.device), one_hot
-
+        one_hot= torch.zeros(self.batch_size, self.n_class).scatter_(1, label, 1)
+        return label.squeeze(1).to(self.device), one_hot.to(self.device)       
 
     def train(self):
 
@@ -95,6 +97,7 @@ class Trainer(object):
             start = 0
 
         # Start time
+        print('Start   ======  training...')
         start_time = time.time()
         for step in range(start, self.total_step):
 
@@ -109,8 +112,8 @@ class Trainer(object):
                 real_images, real_labels = next(data_iter)
 
             # Compute loss with real images
-            
-            real_labels = real_labels.unsqueeze(0)
+
+            real_labels = real_labels.to(self.device)
             real_images = real_images.to(self.device)
 
             d_out_real = self.D(real_images, real_labels)
@@ -187,12 +190,13 @@ class Trainer(object):
             if (step + 1) % self.log_step == 0:
                 elapsed = time.time() - start_time
                 elapsed = str(datetime.timedelta(seconds=elapsed))
-                print("Elapsed [{}], G_step [{}/{}], D_step[{}/{}], d_out_real: {:.4f}".
+                print("Elapsed [{}], G_step [{}/{}], D_step[{}/{}], d_out_real: {:.4f}, d_out_fake: {:.4f}, g_loss_fake: {:.4f}".
                       format(elapsed, step + 1, self.total_step, (step + 1),
-                             self.total_step , d_loss_real.data[0]))
+                             self.total_step , d_loss_real.item(), d_loss_fake.item(), g_loss_fake.item()))
 
             # Sample images
             if (step + 1) % self.sample_step == 0:
+                print('Sample images {}_fake.png'.format(step + 1))
                 fake_images= self.G(fixed_z, z_class_one_hot)
                 save_image(denorm(fake_images.data),
                            os.path.join(self.sample_path, '{}_fake.png'.format(step + 1)))
@@ -205,11 +209,18 @@ class Trainer(object):
 
     def build_model(self):
         # code_dim=100, n_class=1000
-        self.G = Generator(self.z_dim, self.n_class).to(self.device)
-        self.D = Discriminator(self.n_class).to(self.device)
+        self.G = Generator(self.z_dim, self.n_class, chn=self.chn).to(self.device)
+        self.D = Discriminator(self.n_class, chn=self.chn).to(self.device)
         if self.parallel:
-            self.G = nn.DataParallel(self.G)
-            self.D = nn.DataParallel(self.D)
+            print('use parallel...')
+            print('gpuids ', self.gpus)
+            gpus = self.gpus.split(',')
+            
+            self.G = nn.DataParallel(self.G, device_ids=gpus)
+            self.D = nn.DataParallel(self.D, device_ids=gpus)
+
+        # self.G.apply(weights_init)
+        # self.D.apply(weights_init)
 
         # Loss and optimizer
         # self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.g_lr, [self.beta1, self.beta2])

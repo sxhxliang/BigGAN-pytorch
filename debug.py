@@ -1,5 +1,6 @@
 from model_resnet import *
 from demo import *
+from utils import *
 
 dim_z = 120
 vocab_size = 1000
@@ -26,8 +27,11 @@ model = Generator(code_dim=120, n_class=1000, chn=6, debug=True)
 # out = model(inputs,labels)
 
 # print(out.size())
+# model.apply(weights_init)
 
-torch.save(model.state_dict(),'test_model.pth')
+
+print('0,1,2,3'.split(','))
+# torch.save(model.state_dict(),'test_model.pth')
 
 
 

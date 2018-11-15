@@ -15,6 +15,7 @@ def main(config):
 
 
     config.n_class = len(glob.glob(os.path.join(config.image_path, '*/')))
+    print('number class:', config.n_class)
     # Data loader
     data_loader = Data_Loader(config.train, config.dataset, config.image_path, config.imsize,
                              config.batch_size, shuf=config.train)
@@ -25,6 +26,8 @@ def main(config):
     make_folder(config.log_path, config.version)
     make_folder(config.attn_path, config.version)
 
+
+    print('config data_loader and build logs folder')
 
     if config.train:
         if config.model=='sagan':
