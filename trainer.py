@@ -193,6 +193,14 @@ class Trainer(object):
                 print("Elapsed [{}], G_step [{}/{}], D_step[{}/{}], d_out_real: {:.4f}, d_out_fake: {:.4f}, g_loss_fake: {:.4f}".
                       format(elapsed, step + 1, self.total_step, (step + 1),
                              self.total_step , d_loss_real.item(), d_loss_fake.item(), g_loss_fake.item()))
+                
+                if self.use_tensorboard:
+                    self.writer.add_scalar('data/d_loss_real', d_loss_real.item(),(step + 1))
+                    self.writer.add_scalar('data/d_loss_fake', d_loss_fake.item(),(step + 1))
+                    self.writer.add_scalar('data/d_loss', d_loss.item(), (step + 1))
+
+                    self.writer.add_scalar('data/g_loss_fake', g_loss_fake.item(), (step + 1))
+
 
             # Sample images
             if (step + 1) % self.sample_step == 0:
@@ -206,6 +214,8 @@ class Trainer(object):
                            os.path.join(self.model_save_path, '{}_G.pth'.format(step + 1)))
                 torch.save(self.D.state_dict(),
                            os.path.join(self.model_save_path, '{}_D.pth'.format(step + 1)))
+            
+            
 
     def build_model(self):
         # code_dim=100, n_class=1000
@@ -214,8 +224,8 @@ class Trainer(object):
         if self.parallel:
             print('use parallel...')
             print('gpuids ', self.gpus)
-            gpus = self.gpus.split(',')
-            
+            gpus = [int(i) for i in self.gpus.split(',')]
+    
             self.G = nn.DataParallel(self.G, device_ids=gpus)
             self.D = nn.DataParallel(self.D, device_ids=gpus)
 
@@ -233,8 +243,13 @@ class Trainer(object):
         print(self.D)
 
     def build_tensorboard(self):
-        from logger import Logger
-        self.logger = Logger(self.log_path)
+        from tensorboardX import SummaryWriter
+        # from logger import Logger
+        # self.logger = Logger(self.log_path)
+        
+        tf_logs_path = os.path.join(self.log_path, 'tf_logs')
+        self.writer = SummaryWriter(log_dir=tf_logs_path)
+
 
     def load_pretrained_model(self):
         self.G.load_state_dict(torch.load(os.path.join(
