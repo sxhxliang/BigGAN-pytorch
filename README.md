@@ -10,7 +10,7 @@ for 128\*128\*3 resolution
 
     python main.py --batch_size 64  --dataset lsun --adv_loss hinge --version biggan_lsun --image_path /data1/datasets/lsun/lsun
 
-    python main.py --batch_size 64  --dataset lsun --adv_loss hinge --version biggan_lsun --image_path ./data
+    python main.py --batch_size 64  --dataset lsun --adv_loss hinge --version biggan_lsun --parallel True --gpus 0,1,2,3
 
 ## Different
 
