@@ -30,7 +30,6 @@ test/*
 *.tar.gz
 
 # image files.
-*.png
 *.jpeg
 *.jpg
 
