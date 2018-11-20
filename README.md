@@ -28,6 +28,10 @@ for 128\*128\*3 resolution
 LSUN DATASETS(two classes): classroom and church_outdoor
 * iter 82200 (128x128) batch_size 64
 ![](./results/iter_82200_fake.png)
+* iter 128200
+![](./results/iter_128200_fake.png)
+* iter 365000
+![](./results/iter_365000_fake.png)
 
 
 
