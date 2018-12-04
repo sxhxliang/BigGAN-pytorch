@@ -23,6 +23,9 @@ for 128\*128\*3 resolution
 * CPU 
 * GPU
 
+## Pretrained Models
+   I will publish the models I trained 
+
 ## Results
 
 LSUN DATASETS(two classes): classroom and church_outdoor
@@ -32,6 +35,10 @@ LSUN DATASETS(two classes): classroom and church_outdoor
 ![](./results/iter_128200_fake.png)
 * iter 365000
 ![](./results/iter_365000_fake.png)
+* iter 800000
+![](./results/iter_800000_fake.png)
+* iter 900000
+![](./results/iter_900000_fake.png)
 
 
 
