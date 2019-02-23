@@ -1,4 +1,4 @@
-# biggan-pytorch
+# BigGAN-PyTorch
 
 Pytorch implementation of LARGE SCALE GAN TRAINING FOR HIGH FIDELITY NATURAL IMAGE SYNTHESIS (BigGAN)
 
@@ -24,7 +24,17 @@ for 128\*128\*3 resolution
 * GPU
 
 ## Pretrained Models
-   I will publish the models I trained 
+
+LSUN Pretrained model
+[Download](https://drive.google.com/open?id=1wevnhx98Okhz3Yysu4sHN3ogTeEhkun5)
+
+Some methods in the paper to avoid model collapse, please see the paper and retrain your model.
+
+
+## Performance
+
+* Infact, as mentioned in the paper, the model will collapse 
+* I use LSUN datasets to train this model maybe cause bad performance due to the class of classroom is more complex than ImageNet
 
 ## Results
 
